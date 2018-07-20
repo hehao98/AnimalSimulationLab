@@ -8,6 +8,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RVO2Manager : MonoBehaviour {
+
+	// This manager is a singleton
+	static private RVO2Manager instance = null;
+	static public RVO2Manager Instance { get { return instance; } }
+
 	[SerializeField] private float simulationTimeStep = 0.25f;
 	// Default parameters for agents
 	[Header("Agent default parameters")]
@@ -20,9 +25,18 @@ public class RVO2Manager : MonoBehaviour {
 	[SerializeField] private Vector2 velocity = Vector2.zero;
 
 	private float lastUpdatedTime;
+	public float LastUpdatedTime { get { return lastUpdatedTime; } }
 
 	// Initialize RVO2 Library before any other GameObject's Start() function is called
 	void Awake() {
+		// Make sure only one instance exist
+		if (instance == null) {
+			instance = this;
+		} else {
+			Destroy(gameObject);
+			return;
+		}
+
 		RVO.Simulator.Instance.setTimeStep(simulationTimeStep);
 		RVO.Simulator.Instance.setAgentDefaults(
 			neighborDist, 
@@ -38,15 +52,20 @@ public class RVO2Manager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		lastUpdatedTime = Time.time;
+		RVO.Simulator.Instance.processObstacles();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void LateUpdate () {
 		// Tick the simulator
 		while (Time.time - lastUpdatedTime >= simulationTimeStep) {
 			lastUpdatedTime += simulationTimeStep;
 			RVO.Simulator.Instance.doStep();
 		}
+	}
+
+	void OnDestroy() {
+		instance = null;
 	}
 
 	// Utility static functions
