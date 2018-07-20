@@ -6,7 +6,10 @@ public class RVO2Agent : MonoBehaviour {
 
     public Vector2 Position { // Position in 2D
         get { return new Vector2(transform.position.x, transform.position.z); } 
-        set { transform.position = new Vector3(value.x, transform.position.y, value.y); } 
+        set { 
+            transform.position = new Vector3(value.x, transform.position.y, value.y); 
+            RVO.Simulator.Instance.setAgentPosition(agentId, new RVO.Vector2(value.x, value.y)); 
+        } 
     }
     public float NeighborDist {
         get { return neighborDist; }
@@ -31,6 +34,10 @@ public class RVO2Agent : MonoBehaviour {
     public float MaxSpeed {
         get { return maxSpeed; }
         set { maxSpeed = value; RVO.Simulator.Instance.setAgentMaxSpeed(agentId, value); }
+    }
+    public float RotateSpeed {
+        get { return rotateSpeed; }
+        set { rotateSpeed = Mathf.Min(value, 0); }
     }
     public Vector2 Velocity {
         get { 
@@ -60,12 +67,11 @@ public class RVO2Agent : MonoBehaviour {
     [SerializeField] private float timeHorizonObst = 10.0f;
     [SerializeField] private float radius = 1.5f;
     [SerializeField] private float maxSpeed = 2.0f;
+    [SerializeField] private float rotateSpeed = 5.0f;
     [SerializeField] private Vector2 initialVelocity = Vector2.zero;
     [SerializeField] private Vector2 prefVelocity = Vector2.zero;
 
-    // Use this for initialization
-    void Start () {
-        manager = RVO2Manager.Instance;
+    void Awake () {
         agentId = RVO.Simulator.Instance.addAgent(
             RVO2Manager.ToRVO2Vec2(new Vector2(transform.position.x, transform.position.z)),
             neighborDist,
@@ -76,7 +82,11 @@ public class RVO2Agent : MonoBehaviour {
             maxSpeed,
             new RVO.Vector2(initialVelocity.x, initialVelocity.y)
             );
-        RVO.Simulator.Instance.setAgentPrefVelocity(agentId, new RVO.Vector2(initialVelocity.x, initialVelocity.y));
+        RVO.Simulator.Instance.setAgentPrefVelocity(agentId, new RVO.Vector2(prefVelocity.x, prefVelocity.y));
+    }
+
+    void Start() {
+        manager = RVO2Manager.Instance;
     }
     
     // Update is called once per frame
@@ -87,6 +97,11 @@ public class RVO2Agent : MonoBehaviour {
         Vector3 v3d = new Vector3(velocity.x(), 0, velocity.y());
         transform.position = new Vector3(rvoPosition.x(), transform.position.y, rvoPosition.y());
         transform.position += v3d * (Time.time - manager.LastUpdatedTime);
+
+        // Update orientation
+        Quaternion target = Quaternion.LookRotation(v3d);
+        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * rotateSpeed);
+       //transform.rotation = target;
     }
 
     void OnDrawGizmos() {

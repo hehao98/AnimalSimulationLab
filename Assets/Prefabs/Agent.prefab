@@ -102,6 +102,7 @@ MonoBehaviour:
   timeHorizonObst: 10
   radius: 0.6
   maxSpeed: 4
+  rotateSpeed: 5
   initialVelocity: {x: 0, y: 0}
   prefVelocity: {x: 0, y: 0}
 --- !u!136 &136579813186371426

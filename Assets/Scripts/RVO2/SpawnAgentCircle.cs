@@ -22,6 +22,8 @@ public class SpawnAgentCircle : MonoBehaviour {
 				spawnRadius * Mathf.Cos(i * 2 * Mathf.PI / agentNumber),
 				spawnRadius * Mathf.Sin(i * 2 * Mathf.PI / agentNumber)
 			);
+			agents[i].Radius = Random.Range(0.5f, 1.5f);
+			agents[i].gameObject.transform.localScale = agents[i].Radius * Vector3.one;
 
 			// Initialize goals
 			goals[i] = -agents[i].Position;
