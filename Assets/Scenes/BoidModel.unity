@@ -525,10 +525,10 @@ MonoBehaviour:
   agentPrefab: {fileID: 906012038}
   spawnRangeX: {x: -75, y: 75}
   spawnRangeY: {x: -75, y: 75}
-  seperationDistance: 3
+  seperationDistance: 5
   alignmentDistance: 10
   cohesionDistance: 20
   preceptionRadius: 20
   fieldOfViewAngle: 120
   noiseStrength: 2
-  noiseInterval: 1
+  noiseInterval: 3

@@ -19,10 +19,12 @@ public class BoidModel : MonoBehaviour {
 	private RVO2Agent[] agents;
 
 	private float lastNoiseUpdatedTime = 0.0f;
+	private Vector2[] noiseSpeeds;
 
 	// Use this for initialization
 	void Start () {
 		agents = new RVO2Agent[agentNumber];
+		noiseSpeeds = new Vector2[agentNumber];
 		for (int i = 0; i < agentNumber; ++i) {
 			// Randomly generate postion and rotation
 			Vector3 position = new Vector3(
@@ -41,17 +43,22 @@ public class BoidModel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		// Update noise speed vector
+		if (Time.time - lastNoiseUpdatedTime >= noiseInterval) {
+			for (int i = 0; i < agentNumber; ++i) {
+				float angle = Random.Range(0, 2 * Mathf.PI);
+				noiseSpeeds[i].x = noiseStrength * Mathf.Cos(angle);
+				noiseSpeeds[i].y = noiseStrength * Mathf.Sin(angle);
+				lastNoiseUpdatedTime = Time.time;
+			}
+		}
+
 		// For each agent, calculate its preferred velocity
 		for (int i = 0; i < agentNumber; ++i) {
 			Vector2 velocity = Vector2.zero;
 			
 			// Add noise first
-			if (Time.time - lastNoiseUpdatedTime >= noiseInterval) {
-				float angle = Random.Range(0, 2 * Mathf.PI);
-				velocity.x = noiseStrength * Mathf.Cos(angle);
-				velocity.y = noiseStrength * Mathf.Sin(angle);
-				lastNoiseUpdatedTime = Time.time;
-			}
+			velocity += noiseSpeeds[i];
 
 			// Calculate force from neighbors
 			RVO2Agent[] neighbors = GetPerceivedNeighbors(agents[i]);
