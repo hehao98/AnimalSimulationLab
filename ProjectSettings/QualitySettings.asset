@@ -139,7 +139,7 @@ QualitySettings:
     realtimeReflectionProbes: 1
     billboardsFaceCameraPosition: 1
     vSyncCount: 1
-    lodBias: 1.5
+    lodBias: 3.22
     maximumLODLevel: 0
     particleRaycastBudget: 1024
     asyncUploadTimeSlice: 2

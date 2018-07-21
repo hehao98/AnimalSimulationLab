@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class RVO2Agent : MonoBehaviour {
 
+    public int AgentId {
+        get { return agentId; }
+    }
     public Vector2 Position { // Position in 2D
         get { return new Vector2(transform.position.x, transform.position.z); } 
         set { 
@@ -56,7 +59,9 @@ public class RVO2Agent : MonoBehaviour {
         }
     }
 
-    // The Id used in the RVO2 simulation system
+    // The attributes used in the RVO2 simulation system
+    public bool updatePosition = true;
+    public bool updateRotation = true;
     private int agentId;
     private RVO2Manager manager;
     // Default parameters for agents
@@ -91,17 +96,22 @@ public class RVO2Agent : MonoBehaviour {
     
     // Update is called once per frame
     void Update () {
-        // Update position, note that y is the up vector in Unity
         RVO.Vector2 rvoPosition = RVO.Simulator.Instance.getAgentPosition(agentId);
         RVO.Vector2 velocity = RVO.Simulator.Instance.getAgentVelocity(agentId);
         Vector3 v3d = new Vector3(velocity.x(), 0, velocity.y());
-        transform.position = new Vector3(rvoPosition.x(), transform.position.y, rvoPosition.y());
-        transform.position += v3d * (Time.time - manager.LastUpdatedTime);
+        
+        if (updatePosition) {
+            // Update position, note that y is the up vector in Unity
+            transform.position = new Vector3(rvoPosition.x(), transform.position.y, rvoPosition.y());
+            transform.position += v3d * (Time.time - manager.LastUpdatedTime);
+        }
 
         // Update orientation
-        Quaternion target = Quaternion.LookRotation(v3d);
-        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * rotateSpeed);
-       //transform.rotation = target;
+        if (updateRotation && v3d != Vector3.zero) {
+            Quaternion target = Quaternion.LookRotation(v3d);
+            transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * rotateSpeed);
+            //transform.rotation = target;
+        }
     }
 
     void OnDrawGizmos() {
@@ -119,6 +129,10 @@ public class RVO2Agent : MonoBehaviour {
         Vector3 pv3d = new Vector3(PrefVelocity.x, 0, PrefVelocity.y);
         Gizmos.DrawLine(start, start + pv3d);
         Gizmos.DrawCube(start + pv3d, Vector3.one * 0.1f);
+
+        // Draw Agent size mark
+        RVO.Vector2 pos = RVO.Simulator.Instance.getAgentPosition(agentId);
+        Gizmos.DrawWireSphere(new Vector3(pos.x(), transform.position.y, pos.y()), radius);
 
         Gizmos.color = originalColor;
     }

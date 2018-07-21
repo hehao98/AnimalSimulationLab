@@ -4,13 +4,11 @@ using System.Collections;
 
 public class CaribouPlayerController : MonoBehaviour {
 	DeerCharacter deerCharacter;
-	NavMeshAgent agent;
+	RVO2Agent agent;
 	
 	void Start () {
 		deerCharacter = GetComponent<DeerCharacter>();
-		agent = GetComponent<NavMeshAgent>();
-		agent.updatePosition = false;
-		agent.updateRotation = false;
+		agent = GetComponent<RVO2Agent>();
 	}
 	
 	void Update () {	
@@ -78,7 +76,9 @@ public class CaribouPlayerController : MonoBehaviour {
 		deerCharacter.forwardSpeed = forwardAmount;
 		deerCharacter.turnSpeed    = turnAmount;
 
-		// Update NavMeshAgent status manually
-		agent.velocity = GetComponent<Animator>().velocity;
+		// Update RVO Agent status manually
+		Vector3 animatorVelocity = GetComponent<Animator>().velocity;
+		agent.Velocity = new Vector2(animatorVelocity.x, animatorVelocity.z); 
+		agent.Position = new Vector2(transform.position.x, transform.position.z);
 	}
 }
